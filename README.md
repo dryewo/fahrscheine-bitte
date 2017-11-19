@@ -1,5 +1,9 @@
 # Fahrscheine, bitte!
 
+[![Build Status](https://travis-ci.org/dryewo/fahrscheine-bitte.svg?branch=master)](https://travis-ci.org/dryewo/fahrscheine-bitte)
+[![codecov](https://codecov.io/gh/dryewo/fahrscheine-bitte/branch/master/graph/badge.svg)](https://codecov.io/gh/dryewo/fahrscheine-bitte)
+[![Clojars Project](https://img.shields.io/clojars/v/fahrscheine-bitte.svg)](https://clojars.org/fahrscheine-bitte)
+
 A Clojure library for verifying [OAuth2 access tokens].
 For using in [Compojure] routes or in [Swagger1st] security handlers.
 
