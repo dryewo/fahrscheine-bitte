@@ -1,4 +1,4 @@
-(defproject org.zalando/fahrscheine-bitte "0.0.0"
+(defproject fahrscheine-bitte "0.1.0"
   :description "Library for verifying OAuth2 access tokens"
   :url "https://github.com/dryewo/fahrscheine_bitte"
   :license {:name "Eclipse Public License"
