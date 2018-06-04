@@ -53,7 +53,7 @@
    * access-token-resolver-fn takes a token and returns tokeninfo: https://tools.ietf.org/html/rfc7662#section-2.2
    * scope-checker-fn takes tokeninfo and requirements and returns true if scopes in the tokeninfo match the requirements"
   [access-token-resolver-fn scope-checker-fn]
-  (fn [request definition requirements]
+  (fn [request _ requirements]
     (if-let [access-token (extract-access-token request)]
       (if-let [tokeninfo (access-token-resolver-fn access-token)]
         (if (scope-checker-fn tokeninfo requirements)
