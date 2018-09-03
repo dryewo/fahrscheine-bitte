@@ -17,6 +17,10 @@ to enable testability and follow best practices: make state explicit. Please see
 
 ## Usage
 
+```edn
+[fahrscheine-bitte "0.2.1"]
+```
+
 Examples assume the following:
 
 ```clj
