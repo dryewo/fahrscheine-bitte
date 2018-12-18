@@ -1,4 +1,4 @@
-(defproject fahrscheine-bitte "0.2.2"
+(defproject fahrscheine-bitte "0.3.0"
   :description "Library for verifying OAuth2 access tokens"
   :url "https://github.com/dryewo/fahrscheine-bitte"
   :license {:name "Eclipse Public License"

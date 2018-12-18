@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+## [0.3.0] — 2018-12-18
 ### Added
 - Client middleware support to enable wrapping calls to tokeninfo URL.
 ### Changed
@@ -25,4 +27,5 @@ Released without _CHANGELOG.md_.
 
 
 [0.2.2]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.1...0.2.2
-[Unreleased]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.2...HEAD
+[0.3.0]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.2...0.3.0
+[Unreleased]: https://github.com/dryewo/fahrscheine-bitte/compare/0.3.0...HEAD

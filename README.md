@@ -18,7 +18,7 @@ to enable testability and follow best practices: make state explicit. Please see
 ## Usage
 
 ```edn
-[fahrscheine-bitte "0.2.2"]
+[fahrscheine-bitte "0.3.0"]
 ```
 
 Examples assume the following:
