@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Client middleware support to enable wrapping calls to tokeninfo URL.
+### Changed
+- Use Clojure 1.10
+- Bumped library versions.
 
 ## [0.2.2] — 2018-09-03
 ### Added

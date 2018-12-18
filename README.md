@@ -80,9 +80,47 @@ Additionally, we insert a middleware `oauth2/wrap-reason-logger` that will log a
 `(oauth2/make-wrap-oauth2-token-verifier access-token-resolver-fn)` returns a Ring middleware that can be used to
 check access tokens against given token introspection endpoint.
 
+### Wrapping calls to tokeninfo endpoint
+
+For tracing or logging reasons you might want to wrap the actual HTTP GET request to TOKENINFO_URL.
+
+This is possible by giving `:client-middleware` parameter to `oauth2/make-cached-access-token-resolver`:
+
+```clj
+;; Define the middleware
+(defn wrap-client-tracing [http-get]
+  (fn [url params]
+    (println "Calling tokeninfo URL:" url)
+    (let [res (http-get url params)]
+      (println "Tokeninfo result status:" (:status res))
+      res)))
+
+;; Use the middleware when creating a token resolver
+(let [access-token-resolver-fn (oauth2/make-cached-access-token-resolver tokeninfo-url {:client-middleware wrap-client-tracing})]
+  (oauth2/make-wrap-oauth2-token-verifier access-token-resolver-fn))
+```
+
+`:client-middleware` is a middleware for a `clj-http.client/get`-like functions:
+
+```clj
+(ns clj-http.client)
+
+(defn get [url params]
+  ...)
+```
+
+Client middleware is a function that accepts a `clj-http.client/get`-like function —
+which takes 2 parameters, `url` and `params`, and returns a response map just like `clj-http.client/get` does —
+and returns another `clj-http.client/get`-like function.
+
+You can read more in the [clj-http docs](https://github.com/dakrone/clj-http).
+
+By default no client middleware is applied, `clj-http.client/get` is called directly.
+
+
 ## License
 
-Copyright © 2017 Dmitrii Balakhonskii
+Copyright © 2018 Dmitrii Balakhonskii
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
