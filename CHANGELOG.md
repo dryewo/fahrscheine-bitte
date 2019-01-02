@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+
+## [0.4.0] — 2019-01-02
 ### Added
 - Document how to configure caching.
 - Document how to configure timeouts for tokeninfo calls.
@@ -37,6 +39,7 @@ Released without _CHANGELOG.md_.
 
 [0.2.2]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.1...0.2.2
 [0.3.0]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.2...0.3.0
-[Unreleased]: https://github.com/dryewo/fahrscheine-bitte/compare/0.3.0...HEAD
 
 [Hystrix]: https://github.com/Netflix/Hystrix#hystrix-status
+[0.4.0]: https://github.com/dryewo/fahrscheine-bitte/compare/0.3.0...0.4.0
+[Unreleased]: https://github.com/dryewo/fahrscheine-bitte/compare/0.4.0...HEAD
