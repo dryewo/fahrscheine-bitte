@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+- Document how to configure caching.
+- Document how to configure timeouts for tokeninfo calls.
+### Changed
+- Handlers created by `make-wrap-oauth2-token-verifier` and `make-oauth2-s1st-security-handler` never throw
+  (previously threw if tokeninfo service returned 5xx or on connection errors).
+### Removed
+- Not using [Hystrix] because it's causing issues with tracing (call is executed on a different thread)
+  and because it's not maintained anymore.
 
 ## [0.3.0] — 2018-12-18
 ### Added
@@ -29,3 +38,5 @@ Released without _CHANGELOG.md_.
 [0.2.2]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.1...0.2.2
 [0.3.0]: https://github.com/dryewo/fahrscheine-bitte/compare/0.2.2...0.3.0
 [Unreleased]: https://github.com/dryewo/fahrscheine-bitte/compare/0.3.0...HEAD
+
+[Hystrix]: https://github.com/Netflix/Hystrix#hystrix-status

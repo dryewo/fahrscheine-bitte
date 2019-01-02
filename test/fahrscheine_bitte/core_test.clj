@@ -2,8 +2,7 @@
   (:require [clojure.test :refer :all]
             [fahrscheine-bitte.core :refer :all :as v]
             [juxt.iota :refer [given]]
-            [clj-http.client :as http])
-  (:import (com.netflix.hystrix.exception HystrixRuntimeException)))
+            [clj-http.client :as http]))
 
 
 (defn resolve-token-valid [token]
@@ -17,7 +16,7 @@
 
 
 (defn resolve-token-error [token]
-  (throw (IllegalStateException. (str "tokeninfo endpoint returned status code: " (:status 503)))))
+  (throw (IllegalStateException. (str "tokeninfo endpoint returned status code: " 503))))
 
 
 (defn wrap-client-tracing [http-get]
@@ -30,7 +29,6 @@
 
 (def handler1 (make-oauth2-s1st-security-handler resolve-token-valid check-consented-scopes))
 (def handler2 (make-oauth2-s1st-security-handler resolve-token-invalid (constantly true)))
-(def handler3 (make-oauth2-s1st-security-handler resolve-token-error (constantly true)))
 (def handler4 (make-oauth2-s1st-security-handler resolve-token-valid check-corresponding-attributes))
 
 
@@ -63,9 +61,6 @@
       :status := 401
       ::v/reason-code :token-invalid))
 
-  (testing "When tokeninfo returns 5xx"
-    (is (thrown-with-msg? Exception #"returned status" (handler3 {:headers {"authorization" "Bearer footoken"}} nil []))))
-
   (testing "integration"
     (testing "when everything is ok"
       (let [handler         (make-oauth2-s1st-security-handler (make-cached-access-token-resolver "tokeninfo-url" {})
@@ -85,11 +80,21 @@
             (handler {:headers {"authorization" "Bearer footoken"}} nil ["uid"])
             (is (= 1 (count @http-get-called)))))))
 
-    (testing "when http/get returns 500"
+    (testing "when http/get returns 5xx"
       (let [handler (make-oauth2-s1st-security-handler (make-cached-access-token-resolver "tokeninfo-url" {})
                                                        check-consented-scopes)]
         (with-redefs [http/get (fn [_ _] {:status 503})]
-          (is (thrown? HystrixRuntimeException (handler {:headers {"authorization" "Bearer footoken"}} nil []))))))
+          (given (handler {:headers {"authorization" "Bearer footoken"}} nil [])
+            :status := 504
+            :body := "access-token-resolver-fn call threw an exception: java.lang.IllegalStateException: tokeninfo endpoint returned status code: 503"))))
+
+    (testing "when http/get throws an exception"
+      (let [handler (make-oauth2-s1st-security-handler (make-cached-access-token-resolver "tokeninfo-url" {})
+                                                       check-consented-scopes)]
+        (with-redefs [http/get (fn [_ _] (throw (Exception. "EXPLODED!")))]
+          (given (handler {:headers {"authorization" "Bearer footoken"}} nil [])
+            :status := 504
+            :body := "access-token-resolver-fn call threw an exception: java.lang.Exception: EXPLODED!"))))
 
     (testing "wrapped http/get call"
       (let [handler (make-oauth2-s1st-security-handler (make-cached-access-token-resolver "tokeninfo-url"
@@ -137,7 +142,8 @@
       ::v/reason-code :token-invalid))
 
   (testing "When tokeninfo returns 5xx"
-    (is (thrown-with-msg? Exception #"returned status" (wrapped-ring-handler3 {:headers {"authorization" "Bearer footoken"}}))))
+    (given (wrapped-ring-handler3 {:headers {"authorization" "Bearer footoken"}})
+      :status := 504))
 
   (testing "integration"
     (let [messages  (atom [])
@@ -147,5 +153,9 @@
         :status := 401)
       (given ((wrap-log-auth-error wrapped-ring-handler2 logger-fn) {:headers {"authorization" "Bearer footoken"}})
         :status := 401)
-      (is (thrown-with-msg? Exception #"returned status" ((wrap-log-auth-error wrapped-ring-handler3 logger-fn) {:headers {"authorization" "Bearer footoken"}})))
-      (is (= ["no access token given" "invalid access token"] @messages)))))
+      (given ((wrap-log-auth-error wrapped-ring-handler3 logger-fn) {:headers {"authorization" "Bearer footoken"}})
+        :status := 504)
+      (is (= ["no access token given"
+              "invalid access token"
+              "access-token-resolver-fn call threw an exception: java.lang.IllegalStateException: tokeninfo endpoint returned status code: 503"]
+             @messages)))))

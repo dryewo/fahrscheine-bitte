@@ -12,7 +12,8 @@ For using in [Compojure] routes or in [Swagger1st] security handlers.
 Access tokens are verified against [Introspection Endpoint]. In the examples in this document the address of
 the endpoint is configured through `TOKENINFO_URL` environment variable.
 
-Responses of this endpoint are cached for 2 minutes. Creation of the cached token resolver function has to be done by the user 
+Responses of this endpoint are by default cached for 2 minutes and only for last 100 tokens (configurable).
+Creation of the cached token resolver function has to be done by the user using the provided helper function
 to enable testability and follow best practices: make state explicit. Please see examples below.
 
 ## Usage
@@ -56,7 +57,7 @@ Examples assume the following:
 
 In this example we create a security handler that is given to `s1st/protector` to verify tokens on all endpoints that have
 `oauth2` security definition in place.
-Additionally, we insert a middleware `oauth2/wrap-reason-logger` that will log all rejected access attempts.
+Additionally, we insert a middleware `wrap-log-auth-error` that will log all rejected access attempts.
 
 2. Example with [mount] and [Compojure]:
 
@@ -79,6 +80,21 @@ Additionally, we insert a middleware `oauth2/wrap-reason-logger` that will log a
 
 `(oauth2/make-wrap-oauth2-token-verifier access-token-resolver-fn)` returns a Ring middleware that can be used to
 check access tokens against given token introspection endpoint.
+
+### Configuring caching of tokeninfo responses
+
+You can configure caching by passing the following parameters to `make-cached-access-token-resolver`:
+
+* `:ttl-ms` - number of milliseconds to keep cached results. Both positive and negative results are cached.
+  However, errored calls to tokeninfo are not cached. Default: 2000.
+* `:max-size` - number of results to cache. This has to be limited to avoid running out of memory. Default: 100
+
+Example:
+
+```clj
+(let [access-token-resolver-fn (oauth2/make-cached-access-token-resolver tokeninfo-url {:ttl-ms 5000 :max-size 1000})]
+  (oauth2/make-wrap-oauth2-token-verifier access-token-resolver-fn))
+```
 
 ### Wrapping calls to tokeninfo endpoint
 
@@ -117,10 +133,29 @@ You can read more in the [clj-http docs](https://github.com/dakrone/clj-http).
 
 By default no client middleware is applied, `clj-http.client/get` is called directly.
 
+#### Customizing HTTP client call
+
+Client middleware can be used to adjust some parameters of `clj-http.client/get` call, for example, to set timeouts:
+
+```clj
+(defn wrap-client-timeouts [http-get]
+  (fn [url params]
+    ;; :conn-timeout and :socket-timeout do not overlap, giving possible duration of up to 2 seconds
+    (http-get url (merge params {:conn-timeout 1000 :socket-timeout 1000}))))
+
+;; Middlewares are combined using `comp`, first middleware is entered first
+(let [access-token-resolver-fn (oauth2/make-cached-access-token-resolver tokeninfo-url
+                                 {:client-middleware (comp wrap-client-tracing wrap-client-timeouts)})]
+  (oauth2/make-wrap-oauth2-token-verifier access-token-resolver-fn))
+
+``` 
+
+**WARNING** It's not recommended to wrap the `http-get` call with `try`, as it will disrupt the logic of caching and error reporting.
+
 
 ## License
 
-Copyright © 2018 Dmitrii Balakhonskii
+Copyright © 2019 Dmitrii Balakhonskii
 
 Distributed under the Eclipse Public License either version 1.0 or (at
 your option) any later version.
